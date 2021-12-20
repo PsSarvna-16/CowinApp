@@ -5,29 +5,49 @@ import java.util.*;
 
 class Hospital{
 	
-	private static int id = 0;
 	private int hospitalId;
 	private String hospitalName;
 	private String pinCode;
+	private String location;
+	private String contact;
 	// key - combination of vaccine-date-slot
 	HashMap<String,Vaccine> vaccines;
 	HashMap<String,ArrayList<Integer>> appointmentIds;
 
-	Hospital(String hospitalName,String pinCode){
+	Hospital(String hospitalName,String pinCode,String location, String contact){
 		this.hospitalName = hospitalName;
 		this.pinCode = pinCode;
-		this.hospitalId = id++;
+		this.location = location;
+		this.contact = contact;
 		this.vaccines = new HashMap<String,Vaccine>();
 		this.appointmentIds = new HashMap<String,ArrayList<Integer>>();
 	}
 
+	// Getters
 	public int getHospitalId(){
 		return this.hospitalId;
 	}
 
-	public String getPinCode(){
+	public String getPincode(){
 		return this.pinCode;
 	}
+	public String getName(){
+		return this.hospitalName;
+	}
+	public String getLocation(){
+		return this.location;
+	}
+	public String getContact(){
+		return this.contact;
+	}
+
+	// Setters
+	public void setHospId(int hospId){
+		this.hospitalId = hospId;
+	}
+	
+
+
 
 	public ArrayList<Integer> getAppointmentIds(String vaccineSlot){
 		return this.appointmentIds.get(vaccineSlot);

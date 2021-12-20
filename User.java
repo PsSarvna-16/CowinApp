@@ -14,15 +14,24 @@ class User{
 		this.contact = contact;
 	}
 
-	public boolean validatePassword(String password){
-		return this.password.equals(password);
+	// Getters
+	public String getPassword(){
+		return this.password;
 	}
 
-	public boolean changePassword(String oldPwd, String newPwd){
-		if(this.password.equals(oldPwd)){
-			this.password = newPwd;
-			return true;
-		}
-		return false;
+	public String getUserName(){
+		return this.userName;
+	}
+
+	public String getFullName(){
+		return this.fullName;
+	}
+	public String getContact(){
+		return this.contact;
+	}
+
+	// Setters
+	public void setPassword(String password){
+		this.password = password;
 	}
 }

@@ -47,9 +47,9 @@ class CowinApp{
 				Covaxin,CoviShield,SputnikV
 	*/
 
-			Admin admin = new Admin("admin","CowinAdmin","admin","809891XX36");
+			Admin admin = new Admin("cowinadmin","CowinAdmin","admin","809891XX36");
 			customers.put("Sarvna",new Customer("Sarvna","Saravana Kumar","user","809891XX36"));
-			Hospital newHospital = new Hospital("Apollo","625022");
+			Hospital newHospital = new Hospital("Apollo","625022","Madurai","044-859687");
 			newHospital.updateVaccineSlot("Covaxin","01/01/21","Morning",25,252.0);
 			newHospital.updateVaccineSlot("Covishield","01/01/21","Evening",25,360.0);
 			hospitals.put(newHospital.getHospitalId(),newHospital);
@@ -84,12 +84,12 @@ class CowinApp{
 							switch(customerChoice){
 								case 1:
 								{
-									registerMember(cusObj);
+									registerMember(cusObj,db);
 									break;
 								}
 								case 2:
 								{
-									changePassword(cusObj);
+									changePassword(cusObj,db);
 									break;
 								}
 								case 3:
@@ -132,10 +132,15 @@ class CowinApp{
 							switch(adminChoice){
 								case 1:
 								{
-									addHospital(hospitals, hospAdmin);
+									addHospital(hospitals, db);
 									break;
 								}
 								case 2:
+								{
+									addHospitalAdmin(hospitals,hospAdmin,db);
+									break;
+								}
+								case 3:
 								{
 									System.out.print("Enter Vaccine Name : ");
 									String vaccineName = sc.nextLine();
@@ -143,12 +148,12 @@ class CowinApp{
 									System.out.println("\n** " + vaccineName + " Added Successfully.\n");
 									break;
 								}
-								case 3:
+								case 4:
 								{
-									changePassword(admin);
+									changePassword(admin,db);
 									break;
 								}
-								case 4:
+								case 5:
 								{
 									repeat = false;
 									break;
@@ -177,7 +182,7 @@ class CowinApp{
 							switch(hospAdminChoice){
 								case 1:
 								{
-									changePassword(hospAdminObj);
+									changePassword(hospAdminObj,db);
 									break;
 								}
 								case 2:
@@ -252,12 +257,12 @@ class CowinApp{
 		}
 		Customer newCust = new Customer(userName,fullName,password,contact);
 		customers.put(userName, newCust);
-		if(db.addCustomer(userName,password,fullName,contact)){
+		if(db.addCustomer(newCust)){
 			System.out.println("\n** " + userName + " Added Successfully.");
 		}
 	}
 
-	public static void addHospital(HashMap<Integer,Hospital> hospitals,HashMap<String,HospitalAdmin> hospAdmin){
+	public static void addHospital(HashMap<Integer,Hospital> hospitals,CowinDB db) throws SQLException{
 
 		Scanner sc = new Scanner(System.in);
 
@@ -265,20 +270,65 @@ class CowinApp{
 		String hospName = sc.nextLine();
 		System.out.print("Enter Hospital Pincode : ");
 		String pincode = sc.nextLine();
-		Hospital newHospital = new Hospital(hospName,pincode);
-		hospitals.put(newHospital.getHospitalId(),newHospital);
-
-		System.out.print("Enter Hospital Admin userName : ");
-		String hospAdminName = sc.nextLine();
-		System.out.print("Enter Hospital Admin Password  : ");
-		String hospAdminPwd = sc.nextLine();
-		HospitalAdmin newHospAdmin =  new HospitalAdmin(hospAdminName,hospAdminName,hospAdminPwd,"809891XX36",newHospital);
-		hospAdmin.put(hospAdminName,newHospAdmin);
-		
-		System.out.println("** Hospital Added Successfully.");
+		System.out.print("Enter Hospital Location : ");
+		String location = sc.nextLine();
+		System.out.print("Enter Hospital Contact: ");
+		String contact = sc.nextLine();
+		Hospital newHospital = new Hospital(hospName,pincode,location,contact);
+		if(db.addHospital(newHospital)){
+			hospitals.put(newHospital.getHospitalId(),newHospital);
+			System.out.println("** Hospital Added Successfully.");
+		}else{
+			System.out.println("** failed to add hospital.");
+		}
+		return;
 	}
 
-	public static void changePassword(User obj){
+	public static void addHospitalAdmin(HashMap<Integer,Hospital> hospitals,HashMap<String,HospitalAdmin> hospAdmin,CowinDB db) throws SQLException{
+
+		Scanner sc = new Scanner(System.in);
+
+		Hospital newHospital = null;
+
+		Iterator itr = hospitals.entrySet().iterator();
+		while(itr.hasNext()){
+			Map.Entry<Integer,Hospital> map = (Map.Entry<Integer,Hospital>)itr.next();
+			Hospital hosp  = (Hospital)map.getValue();
+			System.out.println(hosp.getHospitalId() + ". " + hosp.getName());
+		}
+
+		System.out.print("Enter Hospital Id : ");
+		int hospID = sc.nextInt();
+		sc.nextLine();
+		
+		if(hospitals.containsKey(hospID)){
+			newHospital = hospitals.get(hospID);
+		}else{
+			System.out.println("Invalid Hospital Name !!!");
+			return;
+		}
+
+		System.out.print("Enter Hospital Admin userName : ");
+		String username = sc.nextLine();
+		System.out.print("Enter Hospital Admin Password  : ");
+		String password = sc.nextLine();
+		System.out.print("Enter Hospital Admin fullName  : ");
+		String fullName = sc.nextLine();
+		System.out.print("Enter Hospital Admin contact  : ");
+		String contact = sc.nextLine();
+		
+		HospitalAdmin newHospAdmin =  new HospitalAdmin(username,fullName,password,contact,newHospital);
+		
+		if(db.addHospitalAdmin(newHospAdmin)){
+			hospAdmin.put(username,newHospAdmin);
+			System.out.println("** Hospital Admin Added Successfully.");
+		}else{
+			System.out.println("** failed to add hospital admin.");
+		}
+	}
+
+	public static void changePassword(User obj, CowinDB db) throws SQLException{
+		
 		Scanner sc = new Scanner(System.in);
 
 		System.out.print("Enter Old Password : ");
@@ -286,28 +336,34 @@ class CowinApp{
 		System.out.print("Enter New Password : ");
 		String newPwd = sc.nextLine();
 
-		if(obj.changePassword(oldPwd,newPwd)){
+		if(db.changePassword(obj.getUserName(), oldPwd, newPwd)){
+			obj.setPassword(newPwd);
 			System.out.println("** Password Changed Successfully");
 		}else{
-			System.out.println("!! Invalid password");
+			System.out.println("** failed to update password.");
 		}
 	}
 
 	// Customer
 
-	public static void registerMember(Customer obj){
+	public static void registerMember(Customer obj,CowinDB db) throws SQLException{
 		Scanner sc = new Scanner(System.in);
 
 		System.out.print("\nEnter Member name : ");
 		String name = sc.nextLine();
 		System.out.print("Enter Aadhar Number : ");
 		String aadhar = sc.nextLine();
-		System.out.print("Enter D.O.B : ");
+		System.out.print("Enter D.O.B (YYYY-MM-DD): ");
 		String dob = sc.nextLine();
-		System.out.print("Enter Gender : ");
+		System.out.print("Enter age : ");
+		int age = sc.nextInt();
+		sc.nextLine();
+		System.out.print("Enter Gender (M,F) : ");
 		String gender = sc.nextLine();
 
-		if(obj.registerMember(name,aadhar,dob,gender)){
+		Member newMemb = obj.registerMember(name,aadhar,dob,age,gender);
+
+		if( (newMemb != null) && db.addMember(obj.getUserName(),newMemb)){
 			System.out.println("** Member Registered Succesfully.");
 		}else{
 			System.out.println("!! Member Registration Failed.");
@@ -327,7 +383,7 @@ class CowinApp{
 		while(itr.hasNext()){
 			Map.Entry<Integer,Hospital> map = (Map.Entry<Integer,Hospital>)itr.next();
 			Hospital hosp  = (Hospital)map.getValue();
-			if(hosp.getPinCode().equals(pincode)){
+			if(hosp.getPincode().equals(pincode)){
 				System.out.println(hosp);
 			}
 		}

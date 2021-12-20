@@ -9,10 +9,11 @@ class Admin extends User{
 
 	public static void options(){
 		System.out.println("------------- Admin --------------");
-		System.out.println("\t1. Add Vaccine.");
 		System.out.println("\t1. Add Hospital.");
-		System.out.println("\t3. Change Password.");
-		System.out.println("\t4. Logout.");
+		System.out.println("\t2. Add Hospital Admin");
+		System.out.println("\t3. Add Vaccine.");
+		System.out.println("\t4. Change Password.");
+		System.out.println("\t5. Logout.");
 		System.out.print("\nEnter your choice : ");
 	}
 }

@@ -33,14 +33,15 @@ class Customer extends User{
 		return members.get(memberId);
 	}
 
-	public boolean registerMember(String name,String aadharNumber,String dob,String gender){
+	public Member registerMember(String name,String aadharNumber,String dob,int age,String gender){
 		if(membersCount < 4){
-			members.add(new Member(name,aadharNumber,dob,gender));
+			Member newMemb = new Member(name,aadharNumber,dob,age,gender);
+			members.add(newMemb);
 			membersCount++;
-			return true;
+			return newMemb;
 		}else{
 			System.out.println("One Customer can add Maximum of 4-Members only");
-			return false;
+			return null;
 		}
 	}
 
