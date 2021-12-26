@@ -133,20 +133,17 @@ class CowinApp{
 					switch(adminChoice){
 						case 1:
 						{
-							//addHospital(hospitals, db);
+							addHospital();
 							break;
 						}
 						case 2:
 						{
-							//addHospitalAdmin(hospitals,hospAdmin,db);
+							addHospitalAdmin();
 							break;
 						}
 						case 3:
 						{
-							System.out.print("Enter Vaccine Name : ");
-							String vaccineName = sc.nextLine();
-							//vaccines.add(vaccineName);
-							System.out.println("\n** " + vaccineName + " Added Successfully.\n");
+							addVaccine();
 							break;
 						}
 						case 4:
@@ -314,8 +311,6 @@ class CowinApp{
 
 	public void addHospitalAdmin() throws SQLException{
 
-		Hospital newHospital = null;
-
 		db.printHospitals();
 
 		System.out.print("Enter Hospital Id : ");
@@ -340,6 +335,26 @@ class CowinApp{
 		}
 	}
 
+	public void addVaccine() throws SQLException{
+
+		System.out.print("Enter Vaccine Name : ");
+		String vaccName = sc.nextLine();
+		System.out.print("Enter Side Effects : ");
+		String sideEffects = sc.nextLine();
+		System.out.print("Enter Price  : ");
+		double price = sc.nextDouble();
+		sc.nextLine();
+		
+		Vaccine newVacc = new Vaccine(vaccName,sideEffects,price);
+
+		if(db.addVaccine(newVacc)){
+			System.out.println("** Vaccine Added Successfully.");
+		}else{
+			System.out.println("** failed to add Vaccine.");
+		}
+
+	}
+
 	public void updateVaccineSlot(HospitalAdmin hospAdmin) throws SQLException{
 
 		db.printVaccines();
@@ -358,9 +373,9 @@ class CowinApp{
 
 		VaccineSlot vacc_slot = new VaccineSlot(vacc_id, hospId,date, slot, noOfDose);
 		if(db.addVaccineSlot(vacc_slot)){
-			System.out.println("Vaccine Slot Added Successfully");
+			System.out.println("** Vaccine Slot Added Successfully.");
 		}else{
-			System.out.println("Unable to add Vaccine Slot.");
+			System.out.println("** Failed to add Vaccine Slot.");
 		}
 	}
 }

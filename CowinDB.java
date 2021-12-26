@@ -210,6 +210,33 @@ class CowinDB{
 		return false;
 	}
 
+	public boolean addVaccine(Vaccine newVacc) throws SQLException{
+
+		String vacc = "INSERT INTO vaccine VALUES (DEFAULT,?,?,?)";
+		
+		try(PreparedStatement ps = con.prepareStatement(vacc)){
+			
+			ps.setString(1, newVacc.getVaccName());
+			ps.setString(2, newVacc.getSideEffects());
+			ps.setDouble(3, newVacc.getPrice());
+
+			int updateCount = ps.executeUpdate();
+			if(updateCount == 1){
+				try(ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()")){
+					if(rs.next()){
+						int vaccId = rs.getInt(1);
+						newVacc.setVaccId(vaccId);
+						con.commit();
+						return true;
+					}
+				}
+			}
+		}
+		con.rollback();
+		return false;
+
+	}
+
 	public boolean addVaccineSlot(VaccineSlot vaccSlot) throws SQLException{
 
 
