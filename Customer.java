@@ -21,6 +21,16 @@ class Customer extends User{
 			this.appointmentIds = new ArrayList<Integer>();
 	}
 
+	// setters
+
+	public void setDosesTaken(int dosesTaken){
+		this.dosesTaken = dosesTaken;
+	}
+
+	public void setMembersCount(int membersCount){
+		this.membersCount = membersCount;
+	}
+
 	public void addAppointment(int appointmentId){
 		appointmentIds.add(appointmentId);
 	}
@@ -48,7 +58,7 @@ class Customer extends User{
 	public void printMembers(){
 		Iterator itr = members.iterator();
 		System.out.println("\n\n------------------------ Members -------------------------------\n");
-		System.out.println("memberId  Name         AadharNumber        dateOfBirth  Gender");
+		System.out.println("memberId  Name         AadharNumber        dateOfBirth  Age  Gender");
 		while(itr.hasNext()){
 			System.out.println(itr.next());
 		}

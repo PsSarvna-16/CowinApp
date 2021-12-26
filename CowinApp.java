@@ -57,7 +57,7 @@ class CowinApp{
 			vaccines.add("Covaxin");
 			vaccines.add("CoviShield");
 			vaccines.add("SputnikV");
-
+			
 			boolean repeat = true;
 			while(true){
 				options();
@@ -94,12 +94,12 @@ class CowinApp{
 								}
 								case 3:
 								{
-									cusObj.printMembers();
+									db.printMembers(cusObj.getUserId());
 									break;
 								}
 								case 4:
 								{
-									scheduleAppointment(hospitals,cusObj,appointments);
+									scheduleAppointment(hospitals,cusObj,appointments,db);
 									break;
 								}
 								case 5:
@@ -370,46 +370,40 @@ class CowinApp{
 		}
 	}
 
-
-	public static void scheduleAppointment(HashMap<Integer,Hospital> hospitals,Customer cusObj,HashMap<Integer,Appointment> appointments){
+	public static void scheduleAppointment(HashMap<Integer,Hospital> hospitals,Customer cusObj,HashMap<Integer,Appointment> appointments,CowinDB db) throws SQLException{
 		
 		Scanner sc = new Scanner(System.in);
 
 		System.out.print("\n\nEnter pincode : ");
 		String pincode = sc.nextLine();
 
-		System.out.println("hospitalId        hospitalName        pinCode");
-		Iterator itr = hospitals.entrySet().iterator();
-		while(itr.hasNext()){
-			Map.Entry<Integer,Hospital> map = (Map.Entry<Integer,Hospital>)itr.next();
-			Hospital hosp  = (Hospital)map.getValue();
-			if(hosp.getPincode().equals(pincode)){
-				System.out.println(hosp);
-			}
-		}
+		db.printHospitals(pincode);
 
 		System.out.print("\nEnter HospitalId to view Vaccine slots : ");
-		int hospitalId = sc.nextInt();
+		int hospId = sc.nextInt();
 		sc.nextLine();
 
-		Hospital hosp = hospitals.get(hospitalId);
-		hosp.showVaccineSlots();
+		db.printVaccineSlots(hospId);
 
 		System.out.print("\n\nEnter Vaccine-Date-Slot : ");
-		String vaccinedateslot = sc.nextLine();
+		int vacc_slot_id = sc.nextInt();
+		sc.nextLine();
 
-		cusObj.printMembers();
+		db.printMembers(cusObj.getUserId());
 
 		System.out.print("\n\nEnter Member Id to book slot : ");
 		int memberId = sc.nextInt();
+		sc.nextLine();
 
-		Member member = cusObj.getMember(memberId);
+		Appointment newAppoint = new Appointment(memberId,vacc_slot_id,hospId,"NOT VACCINATED");
+		
+		if(db.addAppointment(newAppoint)){
+			System.out.println("\n** Appointment booked Succesfully.");
+		}else{
+			System.out.println("\n** Appointment booking Failed.");
+		}
 
-		Appointment newAppoint = hosp.bookAppointment(member,vaccinedateslot);
-		int appointmentId = newAppoint.getAppointmentId();
-		cusObj.addAppointment(appointmentId);
-		appointments.put(appointmentId, newAppoint);
-		System.out.println("\n** Appointment booked Succesfully.");
+		
 	}
 
 	public static void printAppointments(HashMap<Integer,Appointment> appointments,ArrayList<Integer> appointmentIds){

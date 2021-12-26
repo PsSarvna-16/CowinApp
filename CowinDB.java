@@ -107,6 +107,7 @@ class CowinDB{
 				try(ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()")){
 					if(rs.next()){
 						int insertID = rs.getInt(1);
+						newCust.setUserId(insertID);
 						try(PreparedStatement ps1 = con.prepareStatement(cust)){
 							ps1.setInt(1,insertID);
 
@@ -210,6 +211,134 @@ class CowinDB{
 		con.rollback();
 		return false;
 	}
+
+	public boolean addAppointment(Appointment app) throws SQLException{
+
+		String appoint = "INSERT INTO appointment VALUES (DEFAULT,?,?,?,?,?)";
+		try(ResultSet rs1 = st.executeQuery("SELECT available FROM vacc_slot WHERE vacc_slot_id = " +app.getVaccSlotId() )){
+			if(rs1.next()){
+				int available = rs1.getInt(1);
+				if(available < 1){
+					con.rollback();
+					return false;
+				}
+			}
+			try(PreparedStatement ps = con.prepareStatement(appoint)){
+				ps.setInt(1, app.getVaccSlotId());
+				ps.setInt(2, app.getMemberId());
+				ps.setInt(3, app.getHospitalId());
+				ps.setString(4, app.getStatus());
+				ps.setInt(5, app.getVaccinatedBy());
+
+				int updateCount = ps.executeUpdate();
+				if(updateCount == 1){
+					try(ResultSet rs2 = st.executeQuery("SELECT LAST_INSERT_ID()")){
+						if(rs2.next()){
+							int appID = rs2.getInt(1);
+							app.setAppointmentId(appID);
+							updateCount = st.executeUpdate("UPDATE vacc_slot SET available = available-1 WHERE vacc_slot_id="+app.getVaccSlotId());
+							if(updateCount == 1){
+								con.commit();
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		con.rollback();
+		return false;
+	}
+
+	public Customer getCustomer(int userId) throws SQLException{
+
+		Customer newCust = null;
+		String cust = "SELECT username, password, name, contact, doses_taken, members_count FROM user INNER JOIN customer USING (user_id) WHERE user_id=?;";
+		try(PreparedStatement ps = con.prepareStatement(cust)){
+			ps.setInt(1, userId);
+
+			try(ResultSet rs = ps.executeUpdate()){
+				if(rs.next()){
+
+					String userName = rs.getString(2);
+					String password = rs.getString(3);
+					String fullName = rs.getString(4);
+					String contact = rs.getString(5);
+					int doses_taken = rs.getInt(6);
+					int membersCount = rs.getInt(7);
+
+					newCust = new Customer(userName,password,fullName,contact);
+					newCust.setUserId(rs.getInt(1));
+					newCust.setDosesTaken(doses_taken);
+					newCust.setMembersCount(membersCount);
+				}
+			}
+		}
+		return newCust;
+	}
+
+	public void printMembers(int user_id) throws SQLException{
+
+		String memb = "SELECT member_id,name,aadhar,dob,age,gender FROM member WHERE user_id = ?";
+		try(PreparedStatement ps = con.prepareStatement(memb)){
+			ps.setInt(1, user_id);
+			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printHospitals(String pincode) throws SQLException{
+
+		String hosp = "SELECT * FROM hospital WHERE pincode = ?";
+		try(PreparedStatement ps = con.prepareStatement(hosp)){
+			ps.setString(1, pincode);
+			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printVaccineSlots(int hospId) throws SQLException{
+
+		String vacc_slot = "SELECT vs.vacc_slot_id,date,vs.slot,v.name,vs.available FROM vacc_slot vs INNER JOIN vaccine v USING (vacc_id) WHERE hosp_id = ?";
+
+		try(PreparedStatement ps = con.prepareStatement(vacc_slot)){
+			ps.setInt(1, hospId);
+			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printResultSet(ResultSet rs) throws SQLException{
+
+			// Get ResultSetMetaData
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+
+			for(int i= 1 ; i <= columnCount; i++){
+				System.out.print( leftJustify(rsmd.getColumnName(i), rsmd.getColumnDisplaySize(i)) );
+			}
+			System.out.println();
+
+			while(rs.next()){
+
+				for(int i= 1 ; i <= columnCount; i++){
+					System.out.print( leftJustify(rs.getObject(i).toString(), rsmd.getColumnDisplaySize(i)) );
+				}
+				System.out.println();
+			}
+	}
+
+	public String leftJustify(String s, int n){
+		if(s.length() <= n) n++;
+
+		return String.format("%1$-" + n + "s", s);
+	}	
 
 	public void closeConnection() throws SQLException{
 
