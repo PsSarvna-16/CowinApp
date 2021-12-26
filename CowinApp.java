@@ -76,7 +76,7 @@ class CowinApp{
 		System.out.println("\t3. Exit.");
 		System.out.print("\nEnter your choice : ");
 	}
-	
+
 	public void userLogin(int[] user) throws SQLException{
 		switch(user[1]){
 			case 1:
@@ -199,26 +199,8 @@ class CowinApp{
 			}
 		}
 	}
-	
-	public void addCustomer() throws SQLException{
 
-		System.out.print("Enter New userName : ");
-		String userName = sc.nextLine();
-		System.out.print("Enter New Password : ");
-		String password = sc.nextLine();
-		System.out.print("Enter Full Name :  ");
-		String fullName = sc.nextLine();
-		System.out.print("Enter Contact number : ");
-		String contact = sc.nextLine();
-		/*if(customers.containsKey(userName)){
-			System.out.println("\n !! Username already Exist.");
-			return;
-		}*/
-		Customer newCust = new Customer(userName,fullName,password,contact);
-		if(db.addCustomer(newCust)){
-			System.out.println("\n** " + userName + " Added Successfully.");
-		}
-	}
+	// User Methods
 
 	public void changePassword(User obj) throws SQLException{
 
@@ -234,6 +216,25 @@ class CowinApp{
 			System.out.println("** failed to update password.");
 		}
 	}
+	
+	public void addCustomer() throws SQLException{
+
+		System.out.print("Enter New userName : ");
+		String userName = sc.nextLine();
+		System.out.print("Enter New Password : ");
+		String password = sc.nextLine();
+		System.out.print("Enter Full Name :  ");
+		String fullName = sc.nextLine();
+		System.out.print("Enter Contact number : ");
+		String contact = sc.nextLine();
+
+		Customer newCust = new Customer(userName,fullName,password,contact);
+		if(db.addCustomer(newCust)){
+			System.out.println("\n** " + userName + " Added Successfully.");
+		}
+	}
+
+	// Customer Methods
 
 	public void registerMember(Customer obj) throws SQLException{
 
@@ -290,6 +291,8 @@ class CowinApp{
 		}
 	}
 	
+	// Cowin Admin Methods
+
 	public void addHospital() throws SQLException{
 
 		System.out.print("Enter Hospital Name : ");
@@ -353,7 +356,9 @@ class CowinApp{
 			System.out.println("** failed to add Vaccine.");
 		}
 
-	}
+	}	
+
+	// Hospital Admin Methods
 
 	public void updateVaccineSlot(HospitalAdmin hospAdmin) throws SQLException{
 
