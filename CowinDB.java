@@ -19,6 +19,8 @@ class CowinDB{
 		this.url = "jdbc:mysql://localhost:3306/" + this.database;
 	}
 
+	// Database Methods
+
 	public boolean makeConnection() throws SQLException{
 
 		con=DriverManager.getConnection(url, username, password);
@@ -30,6 +32,13 @@ class CowinDB{
 			return false; 
 		}
 	}
+
+	public void closeConnection() throws SQLException{
+
+		con.close();
+	}
+
+	// Validate Data
 
 	public int[] validatePassword(String userName, String password) throws SQLException{
 
@@ -58,6 +67,7 @@ class CowinDB{
 		return null;
 	}
 
+	// Modifying Data
 	public boolean changePassword(String userName, String oldPwd,String newPwd) throws SQLException{
 
 		String pwd = "SELECT password FROM user where username = ?";
@@ -88,6 +98,8 @@ class CowinDB{
 		}
 		return false;
 	}
+
+	// Inserting Data
 
 	public boolean addCustomer(Customer newCust) throws SQLException{
 
@@ -309,6 +321,8 @@ class CowinDB{
 		return false;
 	}
 
+	// Getting Data
+
 	public Customer getCustomer(int userId) throws SQLException{
 
 		Customer newCust = null;
@@ -382,6 +396,8 @@ class CowinDB{
 		}
 		return newAdmin;
 	}
+
+	// Print Data
 
 	public void printMembers(int user_id) throws SQLException{
 
@@ -465,6 +481,7 @@ class CowinDB{
 		}
 	}
 
+	// ResultSet Method
 	public void printResultSet(ResultSet rs) throws SQLException{
 
 			// Get ResultSetMetaData
@@ -491,9 +508,5 @@ class CowinDB{
 		return String.format("%1$-" + n + "s", s);
 	}	
 
-	public void closeConnection() throws SQLException{
-
-		con.close();
-	}
 
 }
