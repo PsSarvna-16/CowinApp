@@ -2,21 +2,22 @@ package com.sarvna;
 
 class Appointment{
 
-	private static int id=0;
 	private int appointmentId;
 	private int memberId;
-	private int vacc_slot_id;
-	private int hospitalId;
-	private String status;
+	private int vaccSlotId;
+	private int hospId;
 	private int vaccinatedBy;
+	private String status;
 
-	Appointment(int memberId,int vacc_slot_id,int hospitalId,String status){
+	Appointment(int memberId,int vaccSlotId,int hospId,String status){
 		
 		this.memberId = memberId;
-		this.vacc_slot_id = vacc_slot_id;
-		this.hospitalId = hospitalId;
+		this.vaccSlotId = vaccSlotId;
+		this.hospId = hospId;
 		this.status = status;
 	}
+
+	// Getters
 
 	public int getAppointmentId(){
 		return this.appointmentId;
@@ -25,24 +26,36 @@ class Appointment{
 		return this.memberId;
 	}
 	public int getVaccSlotId(){
-		return this.vacc_slot_id;
+		return this.vaccSlotId;
 	}
-	public int getHospitalId(){
-		return this.hospitalId;
-	}
-	public String getStatus(){
-		return this.status;
+	public int getHospId(){
+		return this.hospId;
 	}
 	public int getVaccinatedBy(){
 		return this.vaccinatedBy;
 	}
+	public String getStatus(){
+		return this.status;
+	}
 
-
+	// Setters
 
 	public void setAppointmentId(int appointmentId){
 		this.appointmentId = appointmentId;
 	}
+	public void setMemberId(int memberId){
+		this.memberId = memberId;
+	}
+	public void setVaccSlotId(int vaccSlotId){
+		this.vaccSlotId = vaccSlotId;
+	}
+	public void setHospId(int hospId){
+		this.hospId = hospId;
+	}
 	public void setVaccinatedBy(int vaccinatedBy){
 		this.vaccinatedBy = vaccinatedBy;
+	}
+	public void setStatus(String status){
+		this.status = status;
 	}
 }

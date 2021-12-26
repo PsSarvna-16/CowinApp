@@ -138,12 +138,12 @@ class CowinApp{
 						}
 						case 2:
 						{
-							addHospitalAdmin();
+							addVaccine();
 							break;
 						}
 						case 3:
 						{
-							addVaccine();
+							addHospAdmin();
 							break;
 						}
 						case 4:
@@ -162,7 +162,7 @@ class CowinApp{
 			} 
 			case 3:
 			{
-				HospitalAdmin hospAdminObj = db.getHospitalAdmin(user[0]);
+				HospitalAdmin hospAdminObj = db.getHospAdmin(user[0]);
 				boolean repeat = true;
 				while(repeat){
 					HospitalAdmin.options();
@@ -181,7 +181,7 @@ class CowinApp{
 						}
 						case 3:
 						{
-							db.printVaccineSlots(hospAdminObj.getHospitalId());
+							db.printVaccineSlots(hospAdminObj.getHospId());
 							System.out.print("\nEnter Vaccine slot ID : ");
 							int vaccSlotId = sc.nextInt();
 							sc.nextLine();
@@ -250,7 +250,7 @@ class CowinApp{
 		System.out.print("Enter Gender (M,F) : ");
 		String gender = sc.nextLine();
 
-		Member newMemb = obj.registerMember(name,aadhar,dob,age,gender);
+		Member newMemb = new Member(name,aadhar,dob,age,gender);
 
 		if( (newMemb != null) && db.addMember(obj.getUserName(),newMemb)){
 			System.out.println("** Member Registered Succesfully.");
@@ -273,7 +273,7 @@ class CowinApp{
 		db.printVaccineSlots(hospId);
 
 		System.out.print("\n\nEnter Vaccine-Date-Slot : ");
-		int vacc_slot_id = sc.nextInt();
+		int vaccSlotId = sc.nextInt();
 		sc.nextLine();
 
 		db.printMembers(cusObj.getUserId());
@@ -282,7 +282,7 @@ class CowinApp{
 		int memberId = sc.nextInt();
 		sc.nextLine();
 
-		Appointment newAppoint = new Appointment(memberId,vacc_slot_id,hospId,"NOT VACCINATED");
+		Appointment newAppoint = new Appointment(memberId,vaccSlotId,hospId,"NOT VACCINATED");
 		
 		if(db.addAppointment(newAppoint)){
 			System.out.println("\n** Appointment booked Succesfully.");
@@ -312,7 +312,7 @@ class CowinApp{
 		return;
 	}
 
-	public void addHospitalAdmin() throws SQLException{
+	public void addHospAdmin() throws SQLException{
 
 		db.printHospitals();
 
@@ -329,9 +329,9 @@ class CowinApp{
 		System.out.print("Enter Hospital Admin contact  : ");
 		String contact = sc.nextLine();
 		
-		HospitalAdmin newHospAdmin =  new HospitalAdmin(username,fullName,password,contact,hospId);
+		HospitalAdmin newHospAdmin =  new HospitalAdmin(username,password,fullName,contact,hospId);
 		
-		if(db.addHospitalAdmin(newHospAdmin)){
+		if(db.addHospAdmin(newHospAdmin)){
 			System.out.println("** Hospital Admin Added Successfully.");
 		}else{
 			System.out.println("** failed to add hospital admin.");
@@ -374,7 +374,7 @@ class CowinApp{
 		System.out.print("Enter no of Dose  : ");
 		int noOfDose = sc.nextInt();
 		sc.nextLine();
-		int hospId = hospAdmin.getHospitalId();
+		int hospId = hospAdmin.getHospId();
 
 		VaccineSlot vacc_slot = new VaccineSlot(vacc_id, hospId,date, slot, noOfDose);
 		if(db.addVaccineSlot(vacc_slot)){
