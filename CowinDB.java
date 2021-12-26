@@ -27,17 +27,15 @@ class CowinDB{
 		if(con != null){
 			return true;
 		}else{
-			return false;
+			return false; 
 		}
 	}
 
-	public boolean validatePassword(String type, String userName, String password) throws SQLException{
+	public int[] validatePassword(String userName, String password) throws SQLException{
 
-		String query = "SELECT u.username,u.password FROM user u INNER JOIN user_type ut USING (user_type_id) WHERE ut.name = ?";
+		String query = "SELECT u.username,u.password,u.user_id,u.user_type_id  FROM user u INNER JOIN user_type ut USING (user_type_id)";
 
 		try(PreparedStatement ps = con.prepareStatement(query)){
-
-			ps.setString(1, type);
 	
 			try(ResultSet rs = ps.executeQuery()){
 
@@ -46,10 +44,10 @@ class CowinDB{
 					if(userName.equals(rs.getString(1))){
 						if(password.equals(rs.getString(2))){
 							System.out.println("Welcome " + userName);
-							return true;
+							return new int[] {rs.getInt(3),rs.getInt(4)};
 						}else{
 							System.out.println("Invalid password !!!");
-							return false;
+							return null;
 						}
 					}
 				}
@@ -57,7 +55,7 @@ class CowinDB{
 		}
 
 		System.out.println("Invalid Username !!!");
-		return false;
+		return null;
 	}
 
 	public boolean changePassword(String userName, String oldPwd,String newPwd) throws SQLException{
@@ -196,7 +194,7 @@ class CowinDB{
 						int userID = rs.getInt(1);
 						try(PreparedStatement ps1 = con.prepareStatement(hosp_admin)){
 							ps1.setInt(1,userID);
-							ps1.setInt(2,hospAdmin.getHospital().getHospitalId());
+							ps1.setInt(2,hospAdmin.getHospitalId());
 
 							updateCount = ps1.executeUpdate();
 							if(updateCount == 1){
@@ -204,6 +202,34 @@ class CowinDB{
 								return true;
 							}
 						}
+					}
+				}
+			}
+		}
+		con.rollback();
+		return false;
+	}
+
+	public boolean addVaccineSlot(VaccineSlot vaccSlot) throws SQLException{
+
+
+		String vacc = "INSERT INTO vacc_slot VALUES (DEFAULT,?,?,?,?,?)";
+		
+		try(PreparedStatement ps = con.prepareStatement(vacc)){
+			ps.setInt(1, vaccSlot.getHospitalId());
+			ps.setString(2, vaccSlot.getDateOfDose());
+			ps.setString(3, vaccSlot.getSlot());
+			ps.setInt(4, vaccSlot.getVaccId());
+			ps.setInt(5, vaccSlot.getAvailableDose());
+
+			int updateCount = ps.executeUpdate();
+			if(updateCount == 1){
+				try(ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()")){
+					if(rs.next()){
+						int vaccSlotId = rs.getInt(1);
+						vaccSlot.setVaccSlotId(vaccSlotId);
+						con.commit();
+						return true;
 					}
 				}
 			}
@@ -223,12 +249,18 @@ class CowinDB{
 					return false;
 				}
 			}
+
 			try(PreparedStatement ps = con.prepareStatement(appoint)){
 				ps.setInt(1, app.getVaccSlotId());
 				ps.setInt(2, app.getMemberId());
 				ps.setInt(3, app.getHospitalId());
 				ps.setString(4, app.getStatus());
-				ps.setInt(5, app.getVaccinatedBy());
+				
+				if(app.getVaccinatedBy() == 0){
+					ps.setNull(5, Types.INTEGER);	
+				}else{
+					ps.setInt(5, app.getVaccinatedBy());
+				}
 
 				int updateCount = ps.executeUpdate();
 				if(updateCount == 1){
@@ -257,24 +289,71 @@ class CowinDB{
 		try(PreparedStatement ps = con.prepareStatement(cust)){
 			ps.setInt(1, userId);
 
-			try(ResultSet rs = ps.executeUpdate()){
+			try(ResultSet rs = ps.executeQuery()){
 				if(rs.next()){
 
-					String userName = rs.getString(2);
-					String password = rs.getString(3);
-					String fullName = rs.getString(4);
-					String contact = rs.getString(5);
-					int doses_taken = rs.getInt(6);
-					int membersCount = rs.getInt(7);
+					String userName = rs.getString(1);
+					String password = rs.getString(2);
+					String fullName = rs.getString(3);
+					String contact = rs.getString(4);
+					int doses_taken = rs.getInt(5);
+					int membersCount = rs.getInt(6);
 
-					newCust = new Customer(userName,password,fullName,contact);
-					newCust.setUserId(rs.getInt(1));
+					newCust = new Customer(userName,fullName,password,contact);
+					newCust.setUserId(userId);
 					newCust.setDosesTaken(doses_taken);
 					newCust.setMembersCount(membersCount);
 				}
 			}
 		}
 		return newCust;
+	}
+
+	public Admin getCowinAdmin(int userId) throws SQLException{
+
+		Admin newAdmin = null;
+		String cust = "SELECT username, password, name, contact FROM user INNER JOIN cowin_admin USING (user_id) WHERE user_id=?";
+		try(PreparedStatement ps = con.prepareStatement(cust)){
+			ps.setInt(1, userId);
+
+			try(ResultSet rs = ps.executeQuery()){
+				if(rs.next()){
+
+					String userName = rs.getString(1);
+					String password = rs.getString(2);
+					String fullName = rs.getString(3);
+					String contact = rs.getString(4);
+
+					newAdmin = new Admin(userName,fullName,password,contact);
+					newAdmin.setUserId(userId);
+				}
+			}
+		}
+		return newAdmin;
+	}
+
+	public HospitalAdmin getHospitalAdmin(int userId) throws SQLException{
+
+		HospitalAdmin newAdmin = null;
+		String cust = "SELECT username, password, name, contact,hosp_id FROM user INNER JOIN hosp_admin USING (user_id) WHERE user_id=?";
+		try(PreparedStatement ps = con.prepareStatement(cust)){
+			ps.setInt(1, userId);
+
+			try(ResultSet rs = ps.executeQuery()){
+				if(rs.next()){
+
+					String userName = rs.getString(1);
+					String password = rs.getString(2);
+					String fullName = rs.getString(3);
+					String contact = rs.getString(4);
+					int hospId = rs.getInt(5);
+
+					newAdmin = new HospitalAdmin(userName,fullName,password,contact,hospId);
+					newAdmin.setUserId(userId);
+				}
+			}
+		}
+		return newAdmin;
 	}
 
 	public void printMembers(int user_id) throws SQLException{
@@ -289,12 +368,57 @@ class CowinDB{
 		}
 	}
 
+	public void printCustAppointments(int user_id) throws SQLException{
+
+		String appoint = "SELECT m.name,v.date,v.slot,h.name AS 'hosp_name',a.status FROM appointment a INNER JOIN member m USING (member_id) INNER JOIN user u USING (user_id) INNER JOIN hospital h USING (hosp_id) INNER JOIN vacc_slot v USING (vacc_slot_id) WHERE u.user_id = ?";
+		try(PreparedStatement ps = con.prepareStatement(appoint)){
+			ps.setInt(1, user_id);
+			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printVaccAppointments(int vaccineSlotId) throws SQLException{
+
+		String appoint = "SELECT m.name,v.date,v.slot,h.name AS 'hosp_name',a.status FROM appointment a INNER JOIN member m USING (member_id) INNER JOIN user u USING (user_id) INNER JOIN hospital h USING (hosp_id) INNER JOIN vacc_slot v USING (vacc_slot_id) WHERE v.vacc_slot_id = ?";
+		try(PreparedStatement ps = con.prepareStatement(appoint)){
+			ps.setInt(1, vaccineSlotId);
+			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
 	public void printHospitals(String pincode) throws SQLException{
 
 		String hosp = "SELECT * FROM hospital WHERE pincode = ?";
 		try(PreparedStatement ps = con.prepareStatement(hosp)){
 			ps.setString(1, pincode);
 			
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printHospitals() throws SQLException{
+
+		String hosp = "SELECT * FROM hospital";
+		try(PreparedStatement ps = con.prepareStatement(hosp)){
+			try(ResultSet rs =  ps.executeQuery()){
+				printResultSet(rs);
+			}
+		}
+	}
+
+	public void printVaccines() throws SQLException{
+
+		String vacc_slot = "SELECT vacc_id,name FROM vaccine";
+
+		try(PreparedStatement ps = con.prepareStatement(vacc_slot)){
 			try(ResultSet rs =  ps.executeQuery()){
 				printResultSet(rs);
 			}

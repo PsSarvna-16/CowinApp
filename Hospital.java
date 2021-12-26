@@ -66,16 +66,8 @@ class Hospital{
 	}
 
 	public Appointment bookAppointment(Member member,String vaccineSlot){
-		Vaccine vaccine = (Vaccine)vaccines.get(vaccineSlot);
-		vaccine.reduceCount();
-		Appointment appoint = new Appointment(vaccine,member);
-		ArrayList<Integer> list = appointmentIds.get(vaccineSlot);
-		if(list == null){
-			list = new ArrayList<Integer>();
-		}
-		list.add(appoint.getAppointmentId());
-		appointmentIds.put(vaccineSlot,list);
-		return appoint;	
+		
+		return null;	
 	}
 
 	public void updateVaccineSlot(String vaccineName,String date,String slot,int doses,double price){
